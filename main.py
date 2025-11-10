@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-
+import db
 app = FastAPI()
 
 
@@ -17,14 +17,28 @@ html = """
     
     <body>
 
-    
+        <div class="main">
+        <h1>FASTAPI WebSocket Chat</h1>
 
-        <div class="container mt-3">
-            <h1>FASTAPI WebSocket Chat</h1>
+
+      
+        <div class="container mt-3" id="login_div">
+        <h2>Please Login </h2>
+
+        <form action="" >
+            <p>Username
+            <input type="text" class="form-control" id="username" autocomplete="on"
+            </p>
+            <br>
+            <button class="btn btn-outline-primary mt-2" onClick="login(event)"> Start Global Chat </button>
+        </div>
+
+        <div class="container mt-3 d-none" id="chat_room">
+            
             <h2>Your ID: <span id="ws-id"></span> </h2>
-            <form action="" onsubmit="sendMessage(event)">
+            <form action="" >
                 <input type="text" class="form-control" id="messageText" autocomplete="off"/>
-                <button class="btn btn-outline-primary mt-2" > Send </button>
+                <button class="btn btn-outline-primary mt-2" onClick="sendMessage(event)"> Send </button>
             
             </form>
 
@@ -32,16 +46,19 @@ html = """
             </ul>
         </div>
 
+      </div>
+
 
          <script>
 
             var client_id = Date.now();
 
 
-            document.querySelector("#ws-id").textContent = client_id;
-            var ws = new WebSocket(`ws://192.168.123.40:8080/ws/${client_id}`);
+            
+            var chat_div = document.getElementById("chat_room")
+            var login_div = document.getElementById("login_div")
+            var  ws = new WebSocket(`ws://192.168.123.40:8080/ws/${client_id}`);
 
-    
             ws.onmessage = function(event){       
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
@@ -51,6 +68,8 @@ html = """
             };
 
             function sendMessage(event){
+            
+               
                 event.preventDefault()
                 var input = document.getElementById("messageText")
                 ws.send(input.value)
@@ -58,12 +77,54 @@ html = """
                 input.value = ''
                 
             }
-        </script>
+
+           async function login(event) {
+                console.log("You are trying to login")
+                event.preventDefault()
+                var the_username = document.getElementById("username").value
+                if (username == "") {
+                    alert("Please fill the username")
+                    return
+                }
 
         
+            
+                const url = `/login?username=${encodeURIComponent(the_username)}&client_id=${encodeURIComponent(client_id)}`;
+                
+                try {
+                    const response = await fetch(url, {
+                    method: 'POST', // Specify the method as POST
+                });
 
+                    if (!response.ok) {
+                        // Handle HTTP errors
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
-       
+                    login_div.classList.add("d-none")
+                    chat_div.classList.remove("d-none")
+                        
+
+                    const userData = await response.json();
+                    console.log('Success:', userData);
+
+                    document.querySelector("#ws-id").textContent = userData[1]
+
+                   
+                            
+                    // You can now use the returned user data
+                    return userData;
+
+                } 
+                catch (error) {
+                    console.error('Error during login:', error);
+                    // Handle network errors or other issues
+            }
+        }
+
+        
+    </script>
+
 </html>
 
 
@@ -84,6 +145,12 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
+        
+        
+        
+        
+        
+        
         
     async def send_direct_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -110,6 +177,13 @@ async def get():
         "message" : "It is working"
     }
 
+@app.post("/login")
+async def login_the_user(username: str, client_id: int):
+    if username:
+        print("The user ", username, " is added to db")
+        db.add_user(username, client_id)
+        return db.get_a_user_by("username", username)
+
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id : int):
     await manager.connect(websocket)
@@ -120,6 +194,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id : int):
             await manager.send_direct_message(f"you wrote {data}", websocket)
             await manager.broadcast_message(f"Client #{client_id} says: {data}", websocket)
     except WebSocketDisconnect:
+        db.delete_user(client_id)
         manager.disconnect(websocket)
         await manager.broadcast_message(f"Client {client_id} has left the chat :( ")
 

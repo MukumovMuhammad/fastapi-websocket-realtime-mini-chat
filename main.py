@@ -39,7 +39,7 @@ html = """
 
 
             document.querySelector("#ws-id").textContent = client_id;
-            var ws = new WebSocket(`ws://localhost:8000/ws/${client_id}`);
+            var ws = new WebSocket(`ws://192.168.123.40:8080/ws/${client_id}`);
 
     
             ws.onmessage = function(event){       
@@ -104,6 +104,12 @@ async def get():
     print("It is runnin!!! :)")
     return HTMLResponse(html)
 
+@app.get("/work")
+async def get():
+    return {
+        "message" : "It is working"
+    }
+
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id : int):
     await manager.connect(websocket)
@@ -116,5 +122,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id : int):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast_message(f"Client {client_id} has left the chat :( ")
+
+
+
             
     

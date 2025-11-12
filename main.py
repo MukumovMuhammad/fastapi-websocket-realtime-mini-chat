@@ -22,16 +22,12 @@ class ConnectionManager:
         
         
         
-        
-        
-        
-        
-    async def send_direct_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
+    async def send_direct_message(self, message: object, websocket: WebSocket):
+        await websocket.send_json(message)
     
-    async def broadcast_message(self, message: str, websocket: WebSocket):
+    async def broadcast_message(self, message: object, websocket: WebSocket):
         for con in self.active_connections:
-            await con.send_text(message)
+            await con.send_json(message)
 
 
 manager = ConnectionManager()
@@ -67,8 +63,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id : int):
     try:
         while True:
             data = await websocket.receive_text() 
-            await manager.send_direct_message(f"you wrote {data}", websocket)
-            await manager.broadcast_message(f"Client #{client_id} says: {data}", websocket)
+            print(f"well someone wrote {data}")
+            # await manager.send_direct_message(f"you wrote {data}", websocket)
+            await manager.broadcast_message({"message": data, "client_id" : client_id}, websocket)
     except WebSocketDisconnect:
         print(f"The user {client_id} is about to be deleted!")
         db.delete_user(client_id)

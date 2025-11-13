@@ -46,6 +46,8 @@
 
 
         <script>
+            var client_id = Date.now();
+
         document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'hidden') {
                 // Data to send to the server
@@ -66,13 +68,12 @@
         }
         });
 
-            var client_id = Date.now();
-
+            
 
             
             var chat_div = document.getElementById("chat_room")
             var login_div = document.getElementById("login_div")
-            var ws = new WebSocket(`ws://192.168.123.40:8080/ws/${client_id}`);
+            var ws = new WebSocket(`ws://192.168.0.121:8080/ws/${client_id}`);
 
             ws.onmessage = function(event){
                 const messageData = JSON.parse(event.data); 
@@ -80,7 +81,7 @@
                 console.log(messageData)   
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
-                var sender = messageData.client_id == client_id ? "You" : messageData.client_id
+                var sender = messageData.client_id == client_id ? "You" : messageData.username
                 var the_message = messageData.message
                 var content = document.createTextNode(sender + ": " + the_message)
                 message.appendChild(content)
@@ -111,6 +112,7 @@
         
             
                 const url = `/login?username=${encodeURIComponent(the_username)}&client_id=${encodeURIComponent(client_id)}`;
+                
                 
                 try {
                     const response = await fetch(url, {

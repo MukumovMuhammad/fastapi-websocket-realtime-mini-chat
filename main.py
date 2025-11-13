@@ -52,7 +52,7 @@ async def get():
 @app.post("/login")
 async def login_the_user(username: str, client_id: int):
     if username:
-        print("The user ", username, " is added to db")
+        print("The user ", username, " with id : ", client_id,  " is added to db")
         db.add_user(username, client_id)
         return db.get_a_user_by("username", username)
 
@@ -63,14 +63,16 @@ async def websocket_endpoint(websocket: WebSocket, client_id : int):
     try:
         while True:
             data = await websocket.receive_text() 
+            userdata = db.get_a_user_by("client_id", client_id)
+            print(f"The userdata is {userdata}")
             print(f"well someone wrote {data}")
             # await manager.send_direct_message(f"you wrote {data}", websocket)
-            await manager.broadcast_message({"message": data, "client_id" : client_id}, websocket)
+            await manager.broadcast_message({"message": data, "username" : userdata[1],"client_id" : client_id}, websocket)
     except WebSocketDisconnect:
         print(f"The user {client_id} is about to be deleted!")
         db.delete_user(client_id)
         manager.disconnect(websocket)
-        await manager.broadcast_message(f"Client {client_id} has left the chat :( ")
+        await manager.broadcast_message({"message": "has left the chat!", "username" : userdata[1],"client_id" : client_id}, websocket)
 
 
 

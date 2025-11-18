@@ -51,10 +51,9 @@
         document.addEventListener('visibilitychange', function() {
                 if (document.visibilityState === 'hidden') {
                 // Data to send to the server
-                const analyticsData = JSON.stringify({
-                event: 'browser_closed',
-                timestamp: new Date().toISOString()
-                });
+                
+                
+                };
 
               ws.onclose = function(event){       
                 console.log("Lefting the socket")
@@ -65,7 +64,6 @@
                 message.appendChild(content)
                 messages.appendChild(message)
             };
-        }
         });
 
             

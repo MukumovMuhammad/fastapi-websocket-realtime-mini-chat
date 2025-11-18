@@ -118,5 +118,4 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
         manager.disconnect(user_id)
 
 
-            
     

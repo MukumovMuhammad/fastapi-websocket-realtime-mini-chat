@@ -1,0 +1,11 @@
+# .gitignore file
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+
+# Sensitive data
+.env

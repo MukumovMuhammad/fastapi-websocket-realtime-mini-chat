@@ -111,7 +111,7 @@
     
     
 function openWebSocket() {
-    ws = new WebSocket(`ws://192.168.123.40:8080/ws?user_id=${currentUserId}`);
+    ws = new WebSocket(`ws://simple-chat-by-mm.onrender.com/ws?user_id=${currentUserId}`);
 
     ws.onmessage = (event) => {
         console.log("Oh you received data! I mean message")
@@ -122,7 +122,6 @@ function openWebSocket() {
         // data.username is likely missing from your FastAPI payload right now (only 'from' and 'text')
         const sender = data.from == currentUserId ? "You" : `${data.username}`;
         
-
         let li = document.createElement("li");
         li.textContent = `${sender}: ${data.text}`
         messageLists.appendChild(li)

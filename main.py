@@ -11,6 +11,7 @@ class SignInUpRequest(BaseModel):
     password: str
 
 
+
 class ConnectionManager:
 
     def __init__(self):
@@ -71,6 +72,12 @@ async def sign_up(data: SignInUpRequest):
     return db.add_user(username, password)
 
 
+@app.get("/all_users")
+async def get_all_users():
+    # user = db.get_a_user_by("id", id)
+    return db.get_usernames()
+
+
 @app.post("/login")
 async def login_the_user(data: SignInUpRequest):
     username = data.username
@@ -82,7 +89,8 @@ async def login_the_user(data: SignInUpRequest):
             return {"message" : "The user doesn't exist", "status" : False}
         print("The user ", username, " with password : ", password,  " trying to login")
         if db.check_password(username, password):
-            return db.get_a_user_by("username", username)
+            user = db.get_a_user_by("username", username)
+            return {"username":user[1], "id": user[0], "message": "Your are logged in!", "status": True}
         return {"message": "Password or username is incorrect!", "status" : True}
         
 

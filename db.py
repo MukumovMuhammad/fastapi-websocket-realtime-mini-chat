@@ -35,7 +35,7 @@ def check_password(username, password):
      
 
 def get_usernames():
-    cursor.execute(f'SELECT username FROM users')
+    cursor.execute(f'SELECT username, id FROM users')
     users = cursor.fetchall()
     print("Users ", users)
     formated_usernames = []
@@ -58,7 +58,7 @@ def get_a_user_by(type, value):
     user = cursor.fetchone()
     if user:
         return user
-    return "NO data"
+    return False
 
 def delete_user(client_id):
     print(f"Got data {client_id}")

@@ -24,19 +24,65 @@
 
 
     </div>
-<!-- 
-            CHAT ROOM
-    <div id="chat_room" class="d-none mt-4">
-        <h3>Chat Room</h3>
-        <p>Your User ID: <span id="user_id"></span></p>
 
-        <ul id="messages"></ul>
+            <!-- CHAT ROOM -->
+<div id="chat_container" class=" d-none mt-4">
 
-        <form>
-            <input type="text" id="messageText" class="form-control" placeholder="Message..." autocomplete="off">
-            <button class="btn btn-outline-primary mt-2" onclick="sendMessage(event)">Send</button>
-        </form>
-    </div>  -->
+    <div class="row" style="height: 85vh; border: 1px solid #ccc; border-radius: 8px; overflow: hidden;">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="col-3 p-0 bg-light" style="border-right: 1px solid #ccc; overflow-y: auto;">
+            
+            <!-- YOUR PROFILE TOP BAR -->
+            <div class="p-3 bg-primary text-white">
+                <strong id="current_username">Your Profile</strong>
+                <button type="button" class="btn btn-primary" onclick="get_all_users(event)" id="refreshButton">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+            </div>
+
+            <!-- USER LIST -->
+            <ul id="user_list" class="list-group list-group-flush">
+          
+                <li class="list-group-item user-item" onclick="openChat(12, 'John')">
+                    John
+                </li>
+                
+            </ul>
+
+        </div>
+
+        <!-- RIGHT CHAT ROOM -->
+        <div class="col-9 d-flex flex-column p-0">
+
+            <!-- TOP CHAT HEADER -->
+            <div class="p-3 bg-white border-bottom">
+                <h5 id="active_chat_name" class="m-0">Select a user</h5>
+            </div>
+
+            <!-- MESSAGES AREA -->
+            <div id="messages_container" class="flex-grow-1 p-3" 
+                 style="overflow-y: auto; background: #f5f5f5;">
+                
+                <ul id="messages" class="list-unstyled"></ul>
+
+            </div>
+
+            <!-- MESSAGE INPUT -->
+            <div class="p-3 bg-white border-top">
+                <form class="d-flex" onsubmit="sendMessage(event)">
+                    <input type="text" id="messageText"
+                           class="form-control"
+                           placeholder="Message..."
+                           autocomplete="off">
+                    <button class="btn btn-primary ms-2">Send</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 </div>
 

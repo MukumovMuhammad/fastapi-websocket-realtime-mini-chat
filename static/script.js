@@ -53,7 +53,10 @@
                 get_all_users(event)
                 document.getElementById("auth_div").classList.add("d-none");
                 document.getElementById("chat_container").classList.remove("d-none");
+
+                document.getElementById("user_profile_name").innerText = username
                 currentUserId = data.id
+            
                 openWebSocket();
                 // document.getElementById("user_id").textContent = currentUserId;
             }
@@ -88,11 +91,14 @@
             console.log(data)
 
             data.forEach(i => {
-                let li = document.createElement("li");
-                li.textContent = i[0]
-                li.setAttribute('data-user-id', i[1])
-                li.onclick = handleListClick
-                user_list.appendChild(li)
+                if (i[1] != currentUserId){   
+                    let li = document.createElement("li");
+                    li.textContent = i[0]
+                    li.setAttribute('data-user-id', i[1])
+                    li.onclick = handleListClick
+                    user_list.appendChild(li)
+                }
+               
             });
            
         } else {
@@ -101,17 +107,22 @@
     }
 
         function handleListClick(event){
+            
             const clickedElement = event.target;
             selected_chat_id = clickedElement.getAttribute('data-user-id');
             const userName = clickedElement.textContent;
+            console.log(`You clicked user ID: ${selected_chat_id} (${userName})`)
+            document.getElementById("messageInput").classList.remove("d-none")
 
-            alert(`You clicked user ID: ${selected_chat_id} (${userName})`);
+            // alert(`You clicked user ID: ${selected_chat_id} (${userName})`);
             ShowMessages(selected_chat_id)
         }
     
     
 function openWebSocket() {
-    ws = new WebSocket(`ws://simple-chat-by-mm.onrender.com/ws?user_id=${currentUserId}`);
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${protocol}://${window.location.host}/ws?user_id=${currentUserId}`);
 
     ws.onmessage = (event) => {
         console.log("Oh you received data! I mean message")

@@ -27,6 +27,9 @@
 
             <!-- CHAT ROOM -->
 <div id="chat_container" class=" d-none mt-4">
+    <button type="button" class="btn btn-primary" onclick="get_all_users(event)" id="refreshButton">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
 
     <div class="row" style="height: 85vh; border: 1px solid #ccc; border-radius: 8px; overflow: hidden;">
 
@@ -35,11 +38,10 @@
             
             <!-- YOUR PROFILE TOP BAR -->
             <div class="p-3 bg-primary text-white">
-                <strong id="current_username">Your Profile</strong>
-                <button type="button" class="btn btn-primary" onclick="get_all_users(event)" id="refreshButton">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
+                <strong id="current_username">Your Profile <span id="user_profile_name"></span></strong>
+                
             </div>
+          
 
             <!-- USER LIST -->
             <ul id="user_list" class="list-group list-group-flush">
@@ -56,9 +58,11 @@
         <div class="col-9 d-flex flex-column p-0">
 
             <!-- TOP CHAT HEADER -->
-            <div class="p-3 bg-white border-bottom">
+            <div class="p-3 bg-white border-bottom d-flex flex-column">
                 <h5 id="active_chat_name" class="m-0">Select a user</h5>
+                <hr>
             </div>
+              
 
             <!-- MESSAGES AREA -->
             <div id="messages_container" class="flex-grow-1 p-3" 
@@ -69,7 +73,7 @@
             </div>
 
             <!-- MESSAGE INPUT -->
-            <div class="p-3 bg-white border-top">
+            <div class="p-3 bg-white border-top d-none" id="messageInput">
                 <form class="d-flex" onsubmit="sendMessage(event)">
                     <input type="text" id="messageText"
                            class="form-control"

@@ -122,7 +122,7 @@
 function openWebSocket() {
 
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const ws = new WebSocket(`${protocol}://${window.location.host}/ws?user_id=${currentUserId}`);
+    ws = new WebSocket(`${protocol}://${window.location.host}/ws?user_id=${currentUserId}`);
 
     ws.onmessage = (event) => {
         console.log("Oh you received data! I mean message")
@@ -171,7 +171,6 @@ function sendMessage(event) {
     const messageText = inputElement.value;
     console.log(`Sending message ${messageText} to ${selected_chat_id}` )
 
-    
 
     if (ws.readyState === WebSocket.OPEN && messageText.trim() !== '') {
         // Prepare the message object that FastAPI will process

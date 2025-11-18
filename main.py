@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+import json
 import db
 
 app = FastAPI()
@@ -15,7 +16,7 @@ class SignInUpRequest(BaseModel):
 class ConnectionManager:
 
     def __init__(self):
-        self.active_connections: dict[WebSocket] = {}
+        self.active_connections: dict[int, WebSocket] = {}
 
     
     async def connect(self, user_id: int, websocket: WebSocket):
@@ -32,6 +33,7 @@ class ConnectionManager:
         if receiver_id in self.active_connections:
             websocket = self.active_connections[receiver_id]
             await websocket.send_json({
+                "username": db.get_a_user_by("id", sender_id)[1],
                 "from": sender_id,
                 "text": text
             })
@@ -99,18 +101,21 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
     await manager.connect(user_id, websocket)
     try:
         while True:
-            data = await websocket.receive_text() 
-            receiver_id = data["to"]
+            
+            raw = await websocket.receive_text()
+            data = json.loads(raw)
+            print(f"Sb is sending messages {data}")
+            receiver_id = data["receiver_id"]
             text = data["text"]
             # await manager.send_direct_message(f"you wrote {data}", websocket)
             await manager.send_private_message(
                 sender_id=user_id,
-                receiver_id=receiver_id,
+                receiver_id= int(receiver_id),
                 text=text
                 )
     except WebSocketDisconnect:
         print(f"The user {user_id} is about to be deleted!")
-        manager.disconnect(user_id=user_id)
+        manager.disconnect(user_id)
 
 
             

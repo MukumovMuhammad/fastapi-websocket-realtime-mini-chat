@@ -1,7 +1,9 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import db
+
 app = FastAPI()
 
 class SignInUpRequest(BaseModel):
@@ -45,12 +47,11 @@ manager = ConnectionManager()
 
 
 
-
-
-@app.get("/")
-async def get():
-    print("It is runnin!!! :)")
-    return FileResponse('index.html')
+app.mount("/static", StaticFiles(directory="static"), name="static")
+@app.get("/", response_class=HTMLResponse)
+async def read_index():
+    with open("static/index.html", "r") as f:
+        return f.read()
 
 @app.get("/work")
 async def get():

@@ -1,46 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>FastAPI Chat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
 
-<body>
-
-<div class="container mt-4">
-
-    <h1 class="text-center">FastAPI WebSocket Chat</h1>
-
-    <!-- SIGN IN / SIGN UP -->
-    <div id="auth_div" class="mt-4">
-        <div id="sign_in_div" class=""></div>
-        <form id="signin_form">
-            <input type="text" class="form-control mt-2" id="username_inp" placeholder="Username">
-            <input type="password" class="form-control mt-2" id="password_inp" placeholder="Password">
-            <button class="btn btn-primary mt-3" onclick="signin(event)">Sign In</button>
-            <button class="btn btn-success mt-3" onclick="signup(event)">Sign Up</button>
-        </form>
-
-
-    </div>
-<!-- 
-            //CHAT ROOM// 
-    <div id="chat_room" class="d-none mt-4">
-        <h3>Chat Room</h3>
-        <p>Your User ID: <span id="user_id"></span></p>
-
-        <ul id="messages"></ul>
-
-        <form>
-            <input type="text" id="messageText" class="form-control" placeholder="Message..." autocomplete="off">
-            <button class="btn btn-outline-primary mt-2" onclick="sendMessage(event)">Send</button>
-        </form>
-    </div> -->
-
-</div>
-
-
-<script>
+    let ws = null;
+    let currentUserId = null;
 
     //------------------------------------------
     // SIGN UP
@@ -103,8 +63,3 @@
 
 
 
-
-</script>
-
-</body>
-</html>

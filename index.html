@@ -1,149 +1,110 @@
 <!DOCTYPE html>
 <html>
-        <head>
-            <title> Web socket Demo </title>
+<head>
+    <title>FastAPI Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
 
-           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-       </head>
+<body>
 
-      
-    
-    <body>
+<div class="container mt-4">
 
-        <div class="main">
-        <h1>FASTAPI WebSocket Chat</h1>
+    <h1 class="text-center">FastAPI WebSocket Chat</h1>
 
-
-         <div class="container mt-3 d-none" id="chat_room">
-            
-            <h2>Your ID: <span id="ws-id"></span> </h2>
-            <ul id='messages' ckass="mt-5">
-            </ul>
-
-            <form action="submit" >
-                <input type="text" class="form-control" id="messageText" autocomplete="off"/>
-                <button class="btn btn-outline-primary mt-2" onClick="sendMessage(event)"> Send </button>
-            
-            </form>
-        </div>
+    <!-- SIGN IN / SIGN UP -->
+    <div id="auth_div" class="mt-4">
+        <div id="sign_in_div" class=""></div>
+        <form id="signin_form">
+            <input type="text" class="form-control mt-2" id="username_inp" placeholder="Username">
+            <input type="password" class="form-control mt-2" id="password_inp" placeholder="Password">
+            <button class="btn btn-primary mt-3" onclick="signin(event)">Sign In</button>
+            <button class="btn btn-success mt-3" onclick="signup(event)">Sign Up</button>
+        </form>
 
 
-      
-        <div class="container mt-3" id="login_div">
-        <h2>Please Login </h2>
+    </div>
+<!-- 
+            //CHAT ROOM// 
+    <div id="chat_room" class="d-none mt-4">
+        <h3>Chat Room</h3>
+        <p>Your User ID: <span id="user_id"></span></p>
 
-        <form action="" >
-            <p>Username
-            <input type="text" class="form-control" id="username" autocomplete="on">
-            </p>
-            <br>
-            <button class="btn btn-outline-primary mt-2" onClick="login(event)"> Start Global Chat </button>
-        </div>
+        <ul id="messages"></ul>
 
-       
+        <form>
+            <input type="text" id="messageText" class="form-control" placeholder="Message..." autocomplete="off">
+            <button class="btn btn-outline-primary mt-2" onclick="sendMessage(event)">Send</button>
+        </form>
+    </div> -->
 
-      </div>
+</div>
 
 
-        <script>
-            var client_id = Date.now();
+<script>
 
-        document.addEventListener('visibilitychange', function() {
-                if (document.visibilityState === 'hidden') {
-                // Data to send to the server
-                
-                
-                };
+    //------------------------------------------
+    // SIGN UP
+    //------------------------------------------
+    async function signup(event) {
+        event.preventDefault();
 
-              ws.onclose = function(event){       
-                console.log("Lefting the socket")
-                console.log(event.data)
-                var messages = "LEFT the CHAT"
-                var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
+        const username = document.getElementById("username_inp").value;
+        const password = document.getElementById("password_inp").value;
+
+        const res = await fetch("/sign_up", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, password})
         });
 
-            
+        if (res.ok) {
+            const data = await res.json();
+            alert(data.message);
+            console.log(data)
+            username.value = ""
+            password.value = ""
+           
+        } else {
+            alert("Error creating account.");
+        }
+    }
+    //------------------------------------------
+    // SIGN IN
+    //------------------------------------------
+    async function signin(event) {
+        event.preventDefault();
 
-            
-            var chat_div = document.getElementById("chat_room")
-            var login_div = document.getElementById("login_div")
-            var ws = new WebSocket(`ws://192.168.0.121:8080/ws/${client_id}`);
+        const username = document.getElementById("username_inp").value;
+        const password = document.getElementById("password_inp").value;
 
-            ws.onmessage = function(event){
-                const messageData = JSON.parse(event.data); 
-                
-                console.log(messageData)   
-                var messages = document.getElementById('messages')
-                var message = document.createElement('li')
-                var sender = messageData.client_id == client_id ? "You" : messageData.username
-                var the_message = messageData.message
-                var content = document.createTextNode(sender + ": " + the_message)
-                message.appendChild(content)
-                messages.appendChild(message)
-            };
+        const res = await fetch("/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, password})
+        });
 
-            function sendMessage(event){
-            
-               
-                event.preventDefault()
-                var input = document.getElementById("messageText")
-                console.log("You are sending " + input.value)
-                ws.send(input.value)
-                
-                input.value = ''
-                
-            }
-
-           async function login(event) {
-                console.log("You are trying to login")
-                event.preventDefault()
-                var the_username = document.getElementById("username").value
-                if (username == "") {
-                    alert("Please fill the username")
-                    return
-                }
-
-        
-            
-                const url = `/login?username=${encodeURIComponent(the_username)}&client_id=${encodeURIComponent(client_id)}`;
-                
-                
-                try {
-                    const response = await fetch(url, {
-                    method: 'POST', // Specify the method as POST
-                });
-
-                    if (!response.ok) {
-                        // Handle HTTP errors
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    login_div.remove()
-                    chat_div.classList.remove("d-none")
-                        
-
-                    const userData = await response.json();
-                    console.log('Success:', userData);
-
-                    document.querySelector("#ws-id").textContent = userData[1]
-
-                   
-                            
-                    // You can now use the returned user data
-                    return userData;
-
-                } 
-                catch (error) {
-                    console.error('Error during login:', error);
-                    // Handle network errors or other issues
-            }
+        if (res.ok) {
+            const data = await res.json();
+            alert(data.message);
+            console.log(data)
+            username.value = ""
+            password.value = ""
+           
+        } else {
+            alert("Error while loging account.");
         }
 
-        
-    </script>
+        // document.getElementById("auth_div").classList.add("d-none");
+        // document.getElementById("chat_room").classList.remove("d-none");
+        // document.getElementById("user_id").textContent = currentUserId;
 
+        // openWebSocket();
+    }
+
+
+
+
+</script>
+
+</body>
 </html>

@@ -46,7 +46,7 @@ def get_usernames():
     return []
 
 def get_user_id(username):
-    query = f"SELECT id FROM users WHERE {username} = ?"
+    query = f"SELECT id FROM users WHERE username = ?"
     cursor.execute(query, (username,))
     user = cursor.fetchone()[0]
     print("get a user by id data is - > ", user)
@@ -67,7 +67,7 @@ def delete_user(client_id):
 
 def is_user_exist(user):
     cursor = connect.cursor()
-    query = f"SELECT EXISTS(SELECT 1 FROM users WHERE name = ?)"
+    query = f"SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)"
     cursor.execute(query, (user,))
 
     # fetchone() returns a tuple; the existence value is the first element

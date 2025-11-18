@@ -1,9 +1,12 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 import db
 app = FastAPI()
 
-
+class SignInUpRequest(BaseModel):
+    username: str
+    password: str
 
 
 class ConnectionManager:
@@ -57,14 +60,22 @@ async def get():
 
 
 @app.post("/sign_up")
-async def sign_up(username: str, password: str):
+async def sign_up(data: SignInUpRequest):
+    username = data.username
+    password = data.password
+    if password ==  "" or username == "":
+        return {"message" : "no username or password", "status" : False}
     if db.is_user_exist(username):
         return {"message" : "The user already exists", "status" : False}
     return db.add_user(username, password)
 
 
 @app.post("/login")
-async def login_the_user(username: str, password: str):
+async def login_the_user(data: SignInUpRequest):
+    username = data.username
+    password = data.password
+    if password ==  "" or username == "":
+        return {"message" : "no username or password", "status" : False}
     if username:
         if not db.is_user_exist(username):
             return {"message" : "The user doesn't exist", "status" : False}

@@ -1,3 +1,19 @@
+ 
+ document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('The DOM is fully loaded. User just entered the page.');
+    
+
+    if (localStorage.getItem("userid") != null){
+        document.getElementById("auth_div").classList.add("d-none");
+        document.getElementById("chat_container").classList.remove("d-none");
+
+        document.getElementById("user_profile_name").innerText = localStorage.getItem("username")
+        currentUserId = localStorage.getItem("userid")
+        get_all_users(event)
+        openWebSocket()
+    }
+});
+
     let ws = null;
     let currentUserId = null;
     let messages = {}
@@ -22,11 +38,15 @@
             const data = await res.json();
             alert(data.message);
             console.log(data)
-            username.value = ""
-            password.value = ""
+            if (data.status){
+                signin(event)
+            }
+           
            
         } else {
             alert("Error creating account.");
+            username.value = ""
+            password.value = ""
         }
     }
     //------------------------------------------
@@ -56,8 +76,11 @@
 
                 document.getElementById("user_profile_name").innerText = username
                 currentUserId = data.id
+                localStorage.setItem('userid', data.id);
+                localStorage.setItem('username', data.username);
             
                 openWebSocket();
+                get_all_users(event)
                 // document.getElementById("user_id").textContent = currentUserId;
             }
             username.value = ""
@@ -73,6 +96,12 @@
         
     }
 
+
+    function LogOut(event){
+        localStorage.clear()
+        window.location.reload();
+
+    }
 
     async function get_all_users(event) {
         event.preventDefault()
@@ -123,6 +152,7 @@ function openWebSocket() {
 
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     ws = new WebSocket(`${protocol}://${window.location.host}/ws?user_id=${currentUserId}`);
+    
 
     ws.onmessage = (event) => {
         console.log("Oh you received data! I mean message")

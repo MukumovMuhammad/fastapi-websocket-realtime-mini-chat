@@ -142,11 +142,27 @@
             const userName = clickedElement.textContent;
             console.log(`You clicked user ID: ${selected_chat_id} (${userName})`)
             document.getElementById("messageInput").classList.remove("d-none")
+            document.getElementById("selected_user_chat").innerText = userName
 
             // alert(`You clicked user ID: ${selected_chat_id} (${userName})`);
             ShowMessages(selected_chat_id)
         }
-    
+
+function ShowMessages(receiver_id){
+        // console.log(`Here are all messages`)
+        // messages[receiver_id].forEach(i=>{
+        //     console.log(i)
+        // })
+        const messageLists = document.getElementById("messages")
+        messageLists.innerHTML = ""
+        if (messages[receiver_id]){
+            messages[receiver_id].forEach(message =>{
+            messageLists.appendChild(message)
+        })
+        }
+       
+       
+}
     
 function openWebSocket() {
 
@@ -164,14 +180,20 @@ function openWebSocket() {
         const sender = data.from == currentUserId ? "You" : `${data.username}`;
         
         let li = document.createElement("li");
-        li.textContent = `${sender}: ${data.text}`
-        messageLists.appendChild(li)
-        if (messages[data.id]){
-            messages[data.id] = [...messages[data.id], li]    
+        li.innerText = `${sender}: ${data.text}`
+        if (selected_chat_id == data.from){
+          
+            li.textContent = `${sender}: ${data.text}`
+            messageLists.appendChild(li)
         }
-        else{
-            messages[data.id] = [li]
+        
+    
+         if (!messages[data.from]) {
+            messages[data.from] = [];
         }
+
+         messages[data.from].push(li);
+      
         
 
     };
@@ -179,20 +201,7 @@ function openWebSocket() {
 }
 
 
-function ShowMessages(receiver_id){
 
-        if (receiver_id != selected_chat_id){
-            return
-        }
-        const messageLists = document.getElementById("messages")
-        if (messages[receiver_id]){
-            messages[receiver_id].forEach(message =>{
-            messageLists.appendChild(message)
-        })
-        }
-       
-       
-}
 
 // Function to send a message
 function sendMessage(event) {
@@ -216,12 +225,11 @@ function sendMessage(event) {
         let li = document.createElement("li");
         li.textContent = `You: ${messageText}`
         messageLists.appendChild(li)
-        if (messages[currentUserId]){
-            messages[currentUserId] = [...messages[currentUserId], li]    
+        if (!messages[selected_chat_id]) {
+            messages[selected_chat_id] = [];
         }
-        else{
-            messages[currentUserId] = [li]
-        }
+
+        messages[selected_chat_id].push(li);
         // Clear the input field
         inputElement.value = '';
     } else {

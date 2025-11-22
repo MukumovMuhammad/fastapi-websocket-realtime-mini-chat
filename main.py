@@ -31,14 +31,6 @@ class ConnectionManager:
             del self.active_connections[user_id]
         
     
-    # async def Dissconnect_from_socket(self, user_id: int):
-    #     if user_id in self.active_connections:
-    #         websocket = self.active_connections[user_id]
-    #         await websocket.send_json({
-    #             "username": db.get_a_user_by("id", user_id)[1],
-    #             "from": user_id,
-    #             "text": "You are dissconnected"
-    #         })
     
     async def send_private_message(self, sender_id: int, receiver_id: int, text: str):
 
@@ -111,6 +103,7 @@ async def get_all_users():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, user_id : int):
+    await websocket.accept()
     await manager.connect(user_id, websocket)
     try:
         while True:
@@ -119,7 +112,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
             print(f"the id {user_id} is sending messages {data}")
             receiver_id = data["receiver_id"]
             text = data["text"]
-            # await manager.send_direct_message(f"you wrote {data}", websocket)
             await manager.send_private_message(
                 sender_id=user_id,
                 receiver_id= int(receiver_id),
@@ -127,7 +119,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
                 )
     except WebSocketDisconnect:
         print(f"The user {user_id} is disconnected!")
-        # manager.disconnect(user_id)
+        manager.disconnect(user_id)
+
 
 
     

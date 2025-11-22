@@ -166,6 +166,7 @@ function ShowMessages(receiver_id){
     
 function openWebSocket() {
 
+    console.log("trying to open WebSocket")
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     ws = new WebSocket(`${protocol}://${window.location.host}/ws?user_id=${currentUserId}`);
     

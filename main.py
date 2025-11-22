@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import WebSocket, Query
 import json
 import db
 
@@ -20,7 +21,6 @@ class ConnectionManager:
         
     
     async def connect(self, user_id: int, websocket: WebSocket):
-        await websocket.accept()
         self.active_connections[user_id] = websocket
     
 
@@ -101,33 +101,25 @@ async def get_all_users():
 
 
 
+
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, user_id : int):
+async def websocket_endpoint(websocket: WebSocket, user_id: int = Query(...)):
     await websocket.accept()
     await manager.connect(user_id, websocket)
     try:
         while True:
-          
-            try:
-                raw = await websocket.receive_text()
-                data = json.loads(raw)
-                print(f"the id {user_id} is sending messages {data}")
-                receiver_id = data["receiver_id"]
-                text = data["text"]
-                await manager.send_private_message(
-                    sender_id=user_id,
-                    receiver_id= int(receiver_id),
-                    text=text
-                    )
-            except Exception:
-                print(f"Had some Invalid format sending file!")
-                await websocket.send_json({"error": "Invalid format"})
-                continue
-           
-    except WebSocketDisconnect:
-        print(f"The user {user_id} is disconnected!")
-        manager.disconnect(user_id)
+            raw = await websocket.receive_text()
+            data = json.loads(raw)
+            receiver_id = int(data["receiver_id"])
+            text = data["text"]
 
+            await manager.send_private_message(
+                sender_id=user_id,
+                receiver_id=receiver_id,
+                text=text
+            )
+    except WebSocketDisconnect:
+        manager.disconnect(user_id)
 
 
     

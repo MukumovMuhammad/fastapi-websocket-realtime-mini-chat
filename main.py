@@ -107,16 +107,23 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
     await manager.connect(user_id, websocket)
     try:
         while True:
-            raw = await websocket.receive_text()
-            data = json.loads(raw)
-            print(f"the id {user_id} is sending messages {data}")
-            receiver_id = data["receiver_id"]
-            text = data["text"]
-            await manager.send_private_message(
-                sender_id=user_id,
-                receiver_id= int(receiver_id),
-                text=text
-                )
+          
+            try:
+                raw = await websocket.receive_text()
+                data = json.loads(raw)
+                print(f"the id {user_id} is sending messages {data}")
+                receiver_id = data["receiver_id"]
+                text = data["text"]
+                await manager.send_private_message(
+                    sender_id=user_id,
+                    receiver_id= int(receiver_id),
+                    text=text
+                    )
+            except Exception:
+                print(f"Had some Invalid format sending file!")
+                await websocket.send_json({"error": "Invalid format"})
+                continue
+           
     except WebSocketDisconnect:
         print(f"The user {user_id} is disconnected!")
         manager.disconnect(user_id)

@@ -99,6 +99,12 @@ async def get_all_users():
     return db.get_usernames() 
 
 
+import asyncio
+
+async def heartbeat(websocket: WebSocket):
+    while True:
+        await websocket.send_json({"type": "ping"})
+        await asyncio.sleep(15)
 
 
 
@@ -106,6 +112,7 @@ async def get_all_users():
 async def websocket_endpoint(websocket: WebSocket, user_id: int = Query(...)):
     await websocket.accept()
     await manager.connect(user_id, websocket)
+    asyncio.create_task(heartbeat(websocket))
     try:
         while True:
             raw = await websocket.receive_text()

@@ -29,6 +29,16 @@ class ConnectionManager:
         print(f"For some resean user with id {user_id} is disconnected :(")
         if user_id in self.active_connections:
             del self.active_connections[user_id]
+        
+    
+    # async def Dissconnect_from_socket(self, user_id: int):
+    #     if user_id in self.active_connections:
+    #         websocket = self.active_connections[user_id]
+    #         await websocket.send_json({
+    #             "username": db.get_a_user_by("id", user_id)[1],
+    #             "from": user_id,
+    #             "text": "You are dissconnected"
+    #         })
     
     async def send_private_message(self, sender_id: int, receiver_id: int, text: str):
 
@@ -117,7 +127,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
                 )
     except WebSocketDisconnect:
         print(f"The user {user_id} is disconnected!")
-        manager.disconnect(user_id)
+        # manager.disconnect(user_id)
 
 
     

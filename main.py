@@ -17,7 +17,7 @@ class ConnectionManager:
 
     def __init__(self):
         self.active_connections: dict[int, WebSocket] = {}
-
+        
     
     async def connect(self, user_id: int, websocket: WebSocket):
         await websocket.accept()
@@ -25,6 +25,8 @@ class ConnectionManager:
     
 
     def disconnect(self, user_id: int):
+
+        print(f"For some resean user with id {user_id} is disconnected :(")
         if user_id in self.active_connections:
             del self.active_connections[user_id]
     
@@ -73,13 +75,6 @@ async def sign_up(data: SignInUpRequest):
         return {"message" : "The user already exists", "status" : False}
     return db.add_user(username, password)
 
-
-@app.get("/all_users")
-async def get_all_users():
-    # user = db.get_a_user_by("id", id)
-    return db.get_usernames()
-
-
 @app.post("/login")
 async def login_the_user(data: SignInUpRequest):
     username = data.username
@@ -93,18 +88,25 @@ async def login_the_user(data: SignInUpRequest):
         if db.check_password(username, password):
             user = db.get_a_user_by("username", username)
             return {"username":user[1], "id": user[0], "message": "Your are logged in!", "status": True}
-        return {"message": "Password or username is incorrect!", "status" : True}
+        return {"message": "Password or username is incorrect!", "status" : False}
         
+
+@app.get("/all_users")
+async def get_all_users():
+    # user = db.get_a_user_by("id", id)
+    return db.get_usernames() 
+
+
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, user_id : int):
     await manager.connect(user_id, websocket)
     try:
         while True:
-            
             raw = await websocket.receive_text()
             data = json.loads(raw)
-            print(f"Sb is sending messages {data}")
+            print(f"the id {user_id} is sending messages {data}")
             receiver_id = data["receiver_id"]
             text = data["text"]
             # await manager.send_direct_message(f"you wrote {data}", websocket)
@@ -114,7 +116,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id : int):
                 text=text
                 )
     except WebSocketDisconnect:
-        print(f"The user {user_id} is about to be deleted!")
+        print(f"The user {user_id} is disconnected!")
         manager.disconnect(user_id)
 
 

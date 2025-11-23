@@ -175,6 +175,9 @@ function openWebSocket() {
         console.log("Oh you received data! I mean message")
         const messageLists = document.getElementById("messages")
         const data = JSON.parse(event.data);
+        if (data.type == "ping"){
+            return 
+        }
         console.log(`The recieved message ${data.username}`)
 
         // data.username is likely missing from your FastAPI payload right now (only 'from' and 'text')

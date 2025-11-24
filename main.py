@@ -25,9 +25,9 @@ class ConnectionManager:
     
 
     def disconnect(self, user_id: int):
-
         print(f"For some resean user with id {user_id} is disconnected :(")
         if user_id in self.active_connections:
+            db.set_user_online_status(user_id, 0)
             del self.active_connections[user_id]
         
     
@@ -103,7 +103,10 @@ import asyncio
 
 async def heartbeat(websocket: WebSocket):
     while True:
-        await websocket.send_json({"type": "ping"})
+        users_online = db.get_users_online()
+        await websocket.send_json({
+            "type": "ping",
+            "online_users": str(users_online)})
         await asyncio.sleep(15)
 
 
@@ -112,6 +115,7 @@ async def heartbeat(websocket: WebSocket):
 async def websocket_endpoint(websocket: WebSocket, user_id: int = Query(...)):
     await websocket.accept()
     await manager.connect(user_id, websocket)
+    db.set_user_online_status(user_id, 1)
     asyncio.create_task(heartbeat(websocket))
     try:
         while True:
@@ -127,6 +131,4 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int = Query(...)):
             )
     except WebSocketDisconnect:
         manager.disconnect(user_id)
-
-
     

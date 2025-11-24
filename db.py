@@ -8,7 +8,8 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username TEXT,
-    password TEXT
+    password TEXT,
+    online_status TEXT
 )
 ''')
 
@@ -16,8 +17,8 @@ def add_user(name, password):
     if is_user_exist(name):
         return {"message": "user already exists", "status": False}
     cursor.execute('''
-           INSERT INTO users (username, password) VALUES (?,?)
-       ''', (name,password))
+           INSERT INTO users (username, password, online_status) VALUES (?,?,?)
+       ''', (name,password,1))
     connect.commit()
     return {"message": "user added", "status": True, "id": get_user_id(name) }
 
@@ -25,7 +26,6 @@ def check_password(username, password):
     if not is_user_exist(username):
         return False
 
-    
     cursor.execute(" SELECT COUNT(*) FROM users WHERE username = ? AND password = ?", (username, password))
     
     # Fetch the result (a single number: 1 if match found, 0 otherwise)
@@ -44,6 +44,21 @@ def get_usernames():
             formated_usernames.append(i)
         return formated_usernames
     return []
+
+def set_user_online_status(id: int, status: int):
+    cursor.execute("UPDATE users SET online_status = ? WHERE id = ?", (status, id))
+    connect.commit()
+
+def get_users_online():
+    cursor.execute("SELECT id FROM users WHERE online_status = 1")
+    data = cursor.fetchall()
+    # print(f"the fetched data {data}")
+    formated_data = []
+    for i in data:
+        # print(f"the i in the loop {i}")
+        formated_data.append(i[0])
+    # print(f"the formated data! {formated_data}")
+    return formated_data
 
 def get_user_id(username):
     query = f"SELECT id FROM users WHERE username = ?"

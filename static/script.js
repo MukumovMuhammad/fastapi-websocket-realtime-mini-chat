@@ -14,6 +14,7 @@
     }
 });
 
+    let onlineUsers = new Set();
     let ws = null;
     let currentUserId = null;
     let messages = {}
@@ -104,36 +105,58 @@
     }
 
     async function get_all_users(event) {
-        event.preventDefault()
+    if (event) event.preventDefault();
 
-        const res = await fetch("/all_users", {
-            method: "GET",
-        });
+    const res = await fetch("/all_users", { method: "GET" });
+    const user_list = document.getElementById("user_list");
+    user_list.innerHTML = "";
 
-        const user_list = document.getElementById("user_list")
-        user_list.innerHTML = ""
-
-        if (res.ok) {
-            const data = await res.json();
-            // alert(data);
-            console.log("Here are all user datas")
-            console.log(data)
-
-            data.forEach(i => {
-                if (i[1] != currentUserId){   
-                    let li = document.createElement("li");
-                    li.textContent = i[0]
-                    li.setAttribute('data-user-id', i[1])
-                    li.onclick = handleListClick
-                    user_list.appendChild(li)
-                }
-               
-            });
-           
-        } else {
-            alert("Error while fetching  data.");
-        }
+    if (!res.ok) {
+        alert("Error while fetching data.");
+        return;
     }
+
+    const data = await res.json();
+    console.log("Fetched users:", data);
+
+    window.allUsers = data; // store globally
+    refreshUserList();
+}
+
+
+function refreshUserList() {
+    const user_list = document.getElementById("user_list");
+    user_list.innerHTML = "";
+
+    allUsers.forEach(([username, id]) => {
+        if (id == currentUserId) return;
+
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex align-items-center";
+        li.setAttribute("data-user-id", id);
+        li.onclick = handleListClick;
+
+        // Status indicator
+        const dot = document.createElement("span");
+        dot.className = "rounded-circle d-inline-block me-2";
+        dot.style.width = "10px";
+        dot.style.height = "10px";
+        dot.classList.add(
+            onlineUsers.has(id) ? "bg-success" : "bg-secondary"
+        );
+
+        // Username
+        const nameEl = document.createElement("span");
+        nameEl.textContent = username;
+
+        li.appendChild(dot);
+        li.appendChild(nameEl);
+
+        user_list.appendChild(li);
+    });
+}
+
+
 
         function handleListClick(event){
             
@@ -172,12 +195,22 @@ function openWebSocket() {
     
 
     ws.onmessage = (event) => {
-        console.log("Oh you received data! I mean message")
+        console.log("ws.onmessages says")
+        console.log("Oh you received data! I mean message!!")
         const messageLists = document.getElementById("messages")
         const data = JSON.parse(event.data);
-        if (data.type == "ping"){
-            return 
-        }
+        console.log(data)
+        if (data.type === "ping") {
+            try {
+                const parsed = JSON.parse(data.online_users);
+                onlineUsers = new Set(parsed);  // store online IDs
+            } catch (e) {
+                console.error("Failed to parse online_users", e);
+            }
+        // Update UI after receiving new online users
+        refreshUserList();
+        return;
+    }
         console.log(`The recieved message ${data.username}`)
 
         // data.username is likely missing from your FastAPI payload right now (only 'from' and 'text')

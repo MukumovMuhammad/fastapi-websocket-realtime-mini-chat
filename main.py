@@ -106,7 +106,7 @@ async def heartbeat(websocket: WebSocket):
         users_online = db.get_users_online()
         await websocket.send_json({
             "type": "ping",
-            "online_users": str(users_online)})
+            "online_users": users_online})
         await asyncio.sleep(15)
 
 

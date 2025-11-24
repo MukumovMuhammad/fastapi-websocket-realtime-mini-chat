@@ -202,7 +202,8 @@ function openWebSocket() {
         console.log(data)
         if (data.type === "ping") {
             try {
-                const parsed = JSON.parse(data.online_users);
+                const parsed = data.online_users;
+                console.log("the list of online users are updated here they are " + parsed )
                 onlineUsers = new Set(parsed);  // store online IDs
             } catch (e) {
                 console.error("Failed to parse online_users", e);

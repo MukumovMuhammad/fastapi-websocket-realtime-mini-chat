@@ -77,6 +77,7 @@ async def sign_up(data: SignInUpRequest):
         return {"message" : "The user already exists", "status" : False}
     return db.add_user(username, password)
 
+
 @app.post("/login")
 async def login_the_user(data: SignInUpRequest):
     username = data.username

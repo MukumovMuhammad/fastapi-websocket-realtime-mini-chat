@@ -158,10 +158,13 @@ function refreshUserList() {
 
 
 
-        function handleListClick(event){
+function handleListClick(event){
             
             const clickedElement = event.target;
             selected_chat_id = clickedElement.getAttribute('data-user-id');
+            if (selected_chat_id == null){
+                return
+            }
             const userName = clickedElement.textContent;
             console.log(`You clicked user ID: ${selected_chat_id} (${userName})`)
             document.getElementById("messageInput").classList.remove("d-none")
@@ -169,7 +172,7 @@ function refreshUserList() {
 
             // alert(`You clicked user ID: ${selected_chat_id} (${userName})`);
             ShowMessages(selected_chat_id)
-        }
+}
 
 function ShowMessages(receiver_id){
         // console.log(`Here are all messages`)

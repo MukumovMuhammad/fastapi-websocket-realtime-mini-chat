@@ -104,11 +104,14 @@ import asyncio
 
 async def heartbeat(websocket: WebSocket):
     while True:
-        users_online = db.get_users_online()
+        # users_online = db.get_users_online()
+        users_online = []
+        for i in manager.active_connections:
+            users_online.append(i)
         await websocket.send_json({
             "type": "ping",
             "online_users": users_online})
-        await asyncio.sleep(15)
+        await asyncio.sleep(5)
 
 
 
